@@ -25,4 +25,3 @@ class TuplesTest:
     def switch[A, B](t: (A, B)): (B, A) = t match 
       case (a, b) => (b, a)  
     assertEquals(("a", 10), switch((10, "a")))  
-    
