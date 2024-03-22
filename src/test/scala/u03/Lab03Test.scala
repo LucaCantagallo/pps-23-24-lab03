@@ -54,6 +54,8 @@ class Lab03Test:
 
 //task 2
 
+  import Person.*
+
   @Test def testIsStudent() =
     assertTrue(isStudent(Person.Student("Luca", 1999)))
     assertFalse(isStudent(Person.Teacher("Mirko", "PPS")))
@@ -83,6 +85,33 @@ class Lab03Test:
     assertEquals(Just(10), l.minExt())
     assertEquals(-16, Cons(3, Cons(7, Cons(1, Cons(5, Nil())))).foldLeftExt()(0)(_ - _) )
     assertEquals(Cons("PPS", Cons("PCD", Nil())), Cons(Person.Student("Luca", 1999), Cons(Person.Teacher("Mirko", "PPS"), Cons(Person.Teacher("Alessandro", "PCD"), Nil()))).coursesListExt())
+
+  import Stream.*
+
+  @Test def testStreamIterate(): Unit = 
+    val str1 = Stream.iterate(0)(_ + 1) // {0,1,2,3,..}
+    assertEquals(Cons(0, Cons(1, Cons(2, Cons(3, Nil())))), toList(Stream.take(str1)(4)))
+
+  @Test def testStreamMap(): Unit =
+    val str1 = Stream.iterate(0)(_ + 1) // {0,1,2,3,..}
+    val str2 = Stream.map(str1)(_ + 1) // {1,2,3,4,..}
+    assertEquals(Cons(1, Cons(2, Cons(3, Cons(4, Nil())))), toList(Stream.take(str2)(4)))
+
+  @Test def testStreamFilter(): Unit =
+    val str1 = Stream.iterate(0)(_ + 1) // {0,1,2,3,..}
+    val str2 = Stream.filter(str1)(x => x % 2 == 1) // {1,3,5,7,..}
+    assertEquals(Cons(1, Cons(3, Cons(5, Cons(7, Nil())))), toList(Stream.take(str2)(4)))
+
+  @Test def testStreamtakeWhile(): Unit = 
+    val str1 = Stream.iterate(0)(_ + 1) // {0,1,2,3,..}
+    val str2 = Stream.takeWhile(str1)(_ < 5) // {0,1,2,3,4}
+    assertEquals(Cons(0, Cons(1, Cons(2, Cons(3, Cons(4, Nil()))))), Stream.toList(str2))
+
+  @Test def testStreamFill(): Unit =
+    assertEquals(Cons("a", Cons("a", Cons("a", Nil()))), toList[String](fill[String](3)("a")))
+
+  @Test def testPell(): Unit =
+    assertEquals(Cons(0, Cons(1, Cons(2, Cons(5, Cons(12, Nil()))))), toList(Stream.take[Int](pell)(5)))
 
 
 

@@ -3,8 +3,7 @@ package u03
 import u02.AnonymousFunctions.l
 import u03.Optionals.Optional
 import scala.collection.View.Empty
-import u03.Lab03.Sequence.filter
-import u03.Lab03.Sequence.map
+import u03.Lab03.Sequence.*
 
 object Lab03:
   
@@ -51,6 +50,10 @@ object Lab03:
         case Cons(h, Nil()) => Optional.Just(h)
         case _ => Optional.Empty()
 
+      def foldLeft(s: Sequence[Int])(d: Int)(f: (Int, Int) => Int): Int = s match
+        case Cons(h, tail) => foldLeft(tail)(f(d, h))(f)
+        case _ => d
+
     //part 2
 
   enum Person:
@@ -71,22 +74,20 @@ object Lab03:
       case _ => "None"
 
 
-  import Person.*
-  import Sequence.*
+    import Person.*
+    import Sequence.*
+    
+    def isStudent(p: Person): Boolean = p match
+    case Student(_, _) => true
+    case _ => false
 
-  def isStudent(p: Person): Boolean = p match
-  case Student(_, _) => true
-  case _ => false
-
-  def coursesList(s: Sequence[Person]): Sequence[String] = map[Person, String](filter[Person](s)(!isStudent(_)))(Person.course(_))
-  
-  def foldLeft(s: Sequence[Int])(d: Int)(f: (Int, Int) => Int): Int = s match
-    case Cons(h, tail) => foldLeft(tail)(f(d, h))(f)
-    case _ => d
+    def coursesList(s: Sequence[Person]): Sequence[String] = map[Person, String](filter[Person](s)(!isStudent(_)))(Person.course(_))
 
   object SequenceExtension:
 
-    
+    import Person.*
+    import Sequence.*
+
     extension (l: Sequence[Int])
       def sumExt(): Int = l match
         case Cons(h, t) => h + t.sumExt()
@@ -131,6 +132,53 @@ object Lab03:
     
     extension (l: Sequence[Person])
       def coursesListExt(): Sequence[String] = l.filterExt(!isStudent(_)).mapExt[String](Person.course(_))
-  
+
+  //part 3
+  enum Stream[A]:
+    private case Empty()
+    private case Cons(head: () => A, tail: () => Stream[A])
+
+  object Stream:
+
+    def empty[A](): Stream[A] = Empty()
+
+    def cons[A](hd: => A, tl: => Stream[A]): Stream[A] =
+      lazy val head = hd
+      lazy val tail = tl
+      Cons(() => head, () => tail)
+
+    def toList[A](stream: Stream[A]): Sequence[A] = stream match
+      case Cons(h, t) => Sequence.Cons(h(), toList(t()))
+      case _ => Sequence.Nil()
+
+    def map[A, B](stream: Stream[A])(f: A => B): Stream[B] = stream match
+      case Cons(head, tail) => cons(f(head()), map(tail())(f))
+      case _ => Empty()
+
+    def filter[A](stream: Stream[A])(pred: A => Boolean): Stream[A] = stream match
+      case Cons(head, tail) if (pred(head())) => cons(head(), filter(tail())(pred))
+      case Cons(head, tail) => filter(tail())(pred)
+      case _ => Empty()
+
+    def take[A](stream: Stream[A])(n: Int): Stream[A] = (stream, n) match
+      case (Cons(head, tail), n) if n > 0 => cons(head(), take(tail())(n - 1))
+      case _ => Empty()
+
+    def iterate[A](init: => A)(next: A => A): Stream[A] =
+      cons(init, iterate(next(init))(next))
+
+    // Task 3
+
+    def takeWhile[A](stream: Stream[A])(pred: A => Boolean): Stream[A] = stream match
+      case Cons(head, tail) if pred(head()) => cons(head(), takeWhile(tail())(pred))
+      case _ => Empty()
+
+    def fill[A](limit: Int)(next: A): Stream[A] = limit match
+      case n if n >0 => cons(next, fill(limit-1)(next))
+      case _ => empty()
+      
+    def pellGenerator(v1: Int, v2: Int): Stream[Int] = cons[Int](v2, pellGenerator(v1*2+v2, v1))
+    
+    val pell: Stream[Int] = pellGenerator(1, 0)
     
   
