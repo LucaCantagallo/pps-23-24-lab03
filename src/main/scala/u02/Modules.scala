@@ -23,5 +23,10 @@ object Modules extends App:
     case Student(_, _) => true
     case _ => false
 
+  def course(p: Person): String = p match
+    case Teacher(name, course) => course
+
   println(isStudent(Student("mario", 2015)))
+  println(course(Teacher("luca","ita")))
+
 end Modules
