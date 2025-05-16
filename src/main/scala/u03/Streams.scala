@@ -43,7 +43,7 @@ object Streams extends App:
       case Cons(h, t) if pred(h()) => cons(h(), takeWhile(t())(pred))
       case _ => Empty()
 
-    def fill[A](num: Int)(el: A): Stream[A] = num match
+    def fill[A](num: Int)(el: A): Stream[A] = num match 
       case n if n > 0 => cons(el, fill(num-1)(el))
       case _ => empty()
 
